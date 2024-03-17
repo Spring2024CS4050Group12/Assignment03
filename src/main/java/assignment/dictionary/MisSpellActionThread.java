@@ -40,7 +40,9 @@ public class MisSpellActionThread implements Runnable {
     @Override
     public void run() {
 
-        loadDictionary(dictionaryFileName, myDictionary);
+        dictionaryLoaded = loadDictionary(dictionaryFileName, myDictionary);
+
+        System.out.printf("TESTING AFTER LOADING\nTried to find 'right' was in there? %b\n\n", myDictionary.contains("Right"));
 
 
         Platform.runLater(() -> {
@@ -62,20 +64,23 @@ public class MisSpellActionThread implements Runnable {
      * dictionary.
      * @param theDictionary The dictionary to load.
      */
-    public void loadDictionary(String theFileName, DictionaryInterface<String, String> theDictionary) {
-        Scanner input;
-        try {
+    public boolean loadDictionary(String theFileName, DictionaryInterface<String, String> theDictionary) {
 // ADD CODE HERE
 // >>>>>>>>>>> ADDED CODE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-            if (false) {
-                throw new IOException("this shouldn't be printed, this is just to make the compiler happy for now");
+        Scanner input;
+        try (BufferedReader br = new BufferedReader(new FileReader(theFileName))) {
+            String line;
+            while ((line = br.readLine()) != null) {
+                theDictionary.add(line, line);
             }
+
+            return true;
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
         } catch (IOException e) {
             System.out.println("There was an error in reading or opening the file: " + theFileName);
             System.out.println(e.getMessage());
         }
-
+        return false;
     }
 
     /**
@@ -85,11 +90,18 @@ public class MisSpellActionThread implements Runnable {
      */
     public void checkWords(String theFileName, DictionaryInterface<String, String> theDictionary) {
         Scanner input;
-        try {
+//        try {
 // ADD CODE HERE
 // >>>>>>>>>>> ADDED CODE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-            if (false) {
-                throw new IOException("this shouldn't be printed, this is just to make the compiler happy for now");
+        try (BufferedReader br = new BufferedReader(new FileReader(theFileName))) {
+            String line;
+            while ((line = br.readLine()) != null) {
+                String[] parts = line.split(" ");
+                for (String part : parts) {
+                    System.out.printf("%s (%s) ", part, theDictionary.getValue(part));
+                }
+
+                System.out.printf("\n\n");
             }
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
         } catch (IOException e) {
