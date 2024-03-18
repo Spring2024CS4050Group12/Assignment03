@@ -40,7 +40,9 @@ public class MisSpellActionThread implements Runnable {
     @Override
     public void run() {
 
-        loadDictionary(dictionaryFileName, myDictionary);
+        dictionaryLoaded = loadDictionary(dictionaryFileName, myDictionary);
+
+        System.out.printf("TESTING AFTER LOADING\nTried to find 'right' was in there? %b\n\n", myDictionary.contains("Right"));
 
 
         Platform.runLater(() -> {
@@ -62,20 +64,23 @@ public class MisSpellActionThread implements Runnable {
      * dictionary.
      * @param theDictionary The dictionary to load.
      */
-    public void loadDictionary(String theFileName, DictionaryInterface<String, String> theDictionary) {
-        Scanner input;
-        try {
+    public boolean loadDictionary(String theFileName, DictionaryInterface<String, String> theDictionary) {
 // ADD CODE HERE
 // >>>>>>>>>>> ADDED CODE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-            if (false) {
-                throw new IOException("this shouldn't be printed, this is just to make the compiler happy for now");
+        Scanner input;
+        try (BufferedReader br = new BufferedReader(new FileReader(theFileName))) {
+            String line;
+            while ((line = br.readLine()) != null) {
+                theDictionary.add(line, line);
             }
+
+            return true;
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
         } catch (IOException e) {
             System.out.println("There was an error in reading or opening the file: " + theFileName);
             System.out.println(e.getMessage());
         }
-
+        return false;
     }
 
     /**
@@ -85,17 +90,47 @@ public class MisSpellActionThread implements Runnable {
      */
     public void checkWords(String theFileName, DictionaryInterface<String, String> theDictionary) {
         Scanner input;
-        try {
+//        try {
 // ADD CODE HERE
 // >>>>>>>>>>> ADDED CODE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-            if (false) {
-                throw new IOException("this shouldn't be printed, this is just to make the compiler happy for now");
-            }
+            try (BufferedReader br = new BufferedReader(new FileReader(theFileName))) {
+                String line;
+                String checkPunctuation = "\"'?.!,;()";
+                while ((line = br.readLine()) != null) {
+                    String subsection = "";
+                    for (char c : line.toCharArray()) {
+                        if (c == ' ') {
+                            subsection += c;
+                            Wordlet newWordlet = new Wordlet(subsection, checkWord(subsection.trim(), theDictionary));
+                            myLines.addWordlet(newWordlet);
+                            subsection = "";
+                        } else if (checkPunctuation.indexOf(c) != -1) {
+                            if (!subsection.isEmpty()) {
+                                Wordlet newWordlet = new Wordlet(subsection, checkWord(subsection, theDictionary));
+                                myLines.addWordlet(newWordlet);
+                            }
+                            Wordlet newWordlet = new Wordlet("" + c, true);
+                            myLines.addWordlet(newWordlet);
+                            subsection = "";
+                        } else {
+                            subsection += c;
+                        }
+                    }
+
+//                System.out.printf("\n\n");
+                    myLines.nextLine();
+                    showLines(myLines);
+//                    Thread.sleep(500);
+                }
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-        } catch (IOException e) {
-            System.out.println("There was an error in reading or opening the file: " + theFileName);
-            System.out.println(e.getMessage());
-        }
+            } catch (IOException e) {
+                System.out.println("There was an error in reading or opening the file: " + theFileName);
+                System.out.println(e.getMessage());
+            }
+//            } catch (InterruptedException e) {
+//                System.out.println("There was an error in threading sleep");
+//                System.out.println(e.getMessage());
+//            }
 
     }
 
@@ -104,12 +139,7 @@ public class MisSpellActionThread implements Runnable {
      *
      */
     public boolean checkWord(String word, DictionaryInterface<String, String> theDictionary) {
-        boolean result = false;
-// ADD CODE HERE
-//>>>>>>>>>>> ADDED CODE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>        
-
-//<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-        return result;
+        return theDictionary.contains(word);
     }
 
     private void showLines(LinesToDisplay lines) {
