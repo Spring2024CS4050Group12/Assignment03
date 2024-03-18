@@ -93,21 +93,44 @@ public class MisSpellActionThread implements Runnable {
 //        try {
 // ADD CODE HERE
 // >>>>>>>>>>> ADDED CODE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-        try (BufferedReader br = new BufferedReader(new FileReader(theFileName))) {
-            String line;
-            while ((line = br.readLine()) != null) {
-                String[] parts = line.split(" ");
-                for (String part : parts) {
-                    System.out.printf("%s (%s) ", part, theDictionary.getValue(part));
-                }
+            try (BufferedReader br = new BufferedReader(new FileReader(theFileName))) {
+                String line;
+                String checkPunctuation = "\"'?.!,;()";
+                while ((line = br.readLine()) != null) {
+                    String subsection = "";
+                    for (char c : line.toCharArray()) {
+                        if (c == ' ') {
+                            subsection += c;
+                            Wordlet newWordlet = new Wordlet(subsection, checkWord(subsection.trim(), theDictionary));
+                            myLines.addWordlet(newWordlet);
+                            subsection = "";
+                        } else if (checkPunctuation.indexOf(c) != -1) {
+                            if (!subsection.isEmpty()) {
+                                Wordlet newWordlet = new Wordlet(subsection, checkWord(subsection, theDictionary));
+                                myLines.addWordlet(newWordlet);
+                            }
+                            Wordlet newWordlet = new Wordlet("" + c, true);
+                            myLines.addWordlet(newWordlet);
+                            subsection = "";
+                        } else {
+                            subsection += c;
+                        }
+                    }
 
-                System.out.printf("\n\n");
-            }
+//                System.out.printf("\n\n");
+                    myLines.nextLine();
+                    showLines(myLines);
+//                    Thread.sleep(500);
+                }
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-        } catch (IOException e) {
-            System.out.println("There was an error in reading or opening the file: " + theFileName);
-            System.out.println(e.getMessage());
-        }
+            } catch (IOException e) {
+                System.out.println("There was an error in reading or opening the file: " + theFileName);
+                System.out.println(e.getMessage());
+            }
+//            } catch (InterruptedException e) {
+//                System.out.println("There was an error in threading sleep");
+//                System.out.println(e.getMessage());
+//            }
 
     }
 
@@ -116,12 +139,7 @@ public class MisSpellActionThread implements Runnable {
      *
      */
     public boolean checkWord(String word, DictionaryInterface<String, String> theDictionary) {
-        boolean result = false;
-// ADD CODE HERE
-//>>>>>>>>>>> ADDED CODE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>        
-
-//<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-        return result;
+        return theDictionary.contains(word);
     }
 
     private void showLines(LinesToDisplay lines) {
